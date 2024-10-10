@@ -19,3 +19,20 @@ DE BV6LC
 ```
 這個錯誤來自於 Android 的 Fragment 使用過程中，當你在觀察 LiveData 時，應該使用 getViewLifecycleOwner() 來作為 LifecycleOwner。這樣可以確保 LiveData 觀察者在 Fragment 的 view 銷毀時自動移除，避免內存洩漏或意外行為
 ```
+
+避免與目前執行版本一樣，以致無法安裝或弄壞正常版本(改applicationId)
+app\build.gradle
+app\src\main\AndroidManifest.xml
+
+調整繁體地區說明(不知是否造成簡繁體顯示錯誤修改測試)
+app\src\main\country_en2hk.dat
+app\src\main\java\com\bg7yoz\ft8cn\callsign\CallsignDatabase.java
+app\src\main\java\com\bg7yoz\ft8cn\callsignCallsignFileOperation.java
+
+調整部分翻譯
+app\src\main\res\values\*\string.xmls
+
+
+新增網頁本手動新增關注呼號
+app\src\main\java\com\bg7yoz\ft8cn\html
+app\src\main\java\com\bg7yoz\ft8cn\GeneralVariables
