@@ -13,5 +13,4 @@ Check [Releases](https://github.com/N0BOY/FT8CN/releases) to download the latest
 ```
 DE BV6LC
 2024/10/10
-，帮助解决某型号电台的操作模式设置
 ```
