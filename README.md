@@ -23,6 +23,9 @@ DE BV6LC
 避免與目前執行版本一樣，以致無法安裝或弄壞正常版本(改applicationId)
 app\build.gradle
 app\src\main\AndroidManifest.xml
+app\src\main\res\drawable\ft8cn_icon.png
+
+
 
 調整繁體地區說明(不知是否造成簡繁體顯示錯誤修改測試)
 app\src\main\country_en2hk.dat
@@ -32,6 +35,16 @@ app\src\main\java\com\bg7yoz\ft8cn\callsignCallsignFileOperation.java
 調整部分翻譯
 app\src\main\res\values\*\string.xmls
 
+
+翻轉藍芽設備時，造成藍牙中斷，輸入為0.5
+app\src\main\java\com\bg7yoz\ft8cn
+
+移除音量調整，在S24手機會造成閃退
+app\src\main\java\com\bg7yoz\ft8cn\grid_tracker
+
+
+新增GPS校正時間
+app\src\main\assets\ConfigFragment.java
 
 新增網頁本手動新增關注呼號
 app\src\main\java\com\bg7yoz\ft8cn\html
