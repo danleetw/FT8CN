@@ -14,3 +14,7 @@ Check [Releases](https://github.com/N0BOY/FT8CN/releases) to download the latest
 DE BV6LC
 2024/10/10
 ```
+
+2024/10/10 FlexRadioInfoFragment.java 
+```這個錯誤來自於 Android 的 Fragment 使用過程中，當你在觀察 LiveData 時，應該使用 getViewLifecycleOwner() 來作為 LifecycleOwner。這樣可以確保 LiveData 觀察者在 Fragment 的 view 銷毀時自動移除，避免內存洩漏或意外行為
+```
