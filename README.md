@@ -7,8 +7,10 @@
 讓我再次感謝二位。
 
 我的立場是儘可能使用原來的FT8CN版本，這個地方的FT8TW版本，則是一些我的概念驗證區域，如果驗證可行，我還是會提交我的資訊給BG7YOZ。
-畢竟我沒有想要喧賓奪主喔，如果需要正式的、完整的FT8CN版本，可以參考 https://github.com/N0BOY/FT8CN ,
-Check [Releases](https://github.com/N0BOY/FT8CN/releases) to download the latest apk file.
+畢竟我沒有想要喧賓奪主喔，如果需要正式的、完整的FT8CN版本，可以參考 https://github.com/N0BOY/FT8CN 。
+
+FT8TWb版本則由下方下載
+https://github.com/danleetw/FT8TW/releases/tag/v0.921 
 
 ```
 DE BV6LC
