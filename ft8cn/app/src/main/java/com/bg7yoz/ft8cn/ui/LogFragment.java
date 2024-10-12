@@ -23,6 +23,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.Html; //BV6LC
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,6 +55,15 @@ import com.bg7yoz.ft8cn.log.QSLRecordStr;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+
+
+import java.net.NetworkInterface; //BV6LC
+import java.net.SocketException;  //BV6LC
+import java.util.Enumeration;     //BV6LC
+import java.net.InetAddress;      //BV6LC
+import java.net.Inet4Address;     //BV6LC
+
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link LogFragment#newInstance} factory method to
@@ -68,6 +78,31 @@ public class LogFragment extends Fragment {
     private LogQSLAdapter logQSLAdapter;
     private boolean loading = false;//防止滑动触发多次查询
     private int lastItemPosition;
+
+
+
+	//BV6LC 取得本地IP
+
+	public String getLocalIpAddress() {
+    try {
+        for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+            NetworkInterface intf = en.nextElement();
+            for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                InetAddress inetAddress = enumIpAddr.nextElement();
+                if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                    return inetAddress.getHostAddress();
+                }
+            }
+        }
+    } catch (SocketException ex) {
+        //Log.e("IP Address", ex.toString());
+    }
+    return null;
+}
+
+
+
+
 
 
     public LogFragment() {
@@ -154,9 +189,19 @@ public class LogFragment extends Fragment {
         binding.exportImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+				/*
+                new HelpDialog(requireContext(), requireActivity()
+                            , String.format(GeneralVariables.getStringFromResource(R.string.export_info)
+                            , getLocalIpAddress(), LogHttpServer.DEFAULT_PORT)
+                            , false).show();				
+				*/
+				
+				
+				//BV6LC
                 if (getLocalIp()==null) {
                     new HelpDialog(requireContext(), requireActivity()
-                            , GeneralVariables.getStringFromResource(R.string.export_null)
+                            , String.format(GeneralVariables.getStringFromResource(R.string.export_null)
+							, getLocalIpAddress(), LogHttpServer.DEFAULT_PORT) 
                             ,false).show();
                 }else {
                     new HelpDialog(requireContext(), requireActivity()
@@ -164,6 +209,7 @@ public class LogFragment extends Fragment {
                             , getLocalIp(), LogHttpServer.DEFAULT_PORT)
                             , false).show();
                 }
+				
 
             }
         });

@@ -27,6 +27,16 @@ import com.bg7yoz.ft8cn.maidenhead.MaidenheadGrid;
 import com.bg7yoz.ft8cn.rigs.BaseRigOperation;
 import com.bg7yoz.ft8cn.timer.UtcTimer;
 
+import com.bg7yoz.ft8cn.callsign.CallsignDatabase; //BV6LC
+import com.bg7yoz.ft8cn.callsign.CallsignInfo;     //BV6LC
+
+import com.bg7yoz.ft8cn.callsign.OnAfterQueryCallsignLocation; //BV6LC
+import java.util.concurrent.Callable; 				//BV6LC
+import java.util.concurrent.ExecutionException;		//BV6LC
+import java.util.concurrent.FutureTask;				//BV6LC
+import java.util.concurrent.atomic.AtomicReference; //BV6LC
+
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,6 +68,7 @@ public class LogHttpServer extends NanoHTTPD {
         String uri = "";
         String msg;
         Log.i(TAG, "serve uri: " + session.getUri());
+		
 
         if (uriList.length >= 2) {
             uri = uriList[1];
@@ -87,6 +98,9 @@ public class LogHttpServer extends NanoHTTPD {
             msg = HTML_STRING(getAllTableName());
         } else if (uri.equalsIgnoreCase("FOLLOWCALLSIGNS")) {//查关注的呼号
             msg = HTML_STRING(getFollowCallsigns());
+		} else if (uri.equalsIgnoreCase("ADDFOLLOW")) {// 手動新增關注的呼号 // [MODIFIED] BV6LC
+            addFollowCallSign(session);	      // [MODIFIED] BV6LC
+			msg = HTML_STRING(getFollowCallsigns());
         } else if (uri.equalsIgnoreCase("DELFOLLOW")) {//删除关注的呼号
             if (uriList.length >= 3) {
                 deleteFollowCallSign(uriList[2].replace("_", "/"));
@@ -332,7 +346,7 @@ public class LogHttpServer extends NanoHTTPD {
      */
     private String getAllTableName() {
         Cursor cursor = mainViewModel.databaseOpr.getDb()
-                .rawQuery("select * from sqlite_master where type='table'", null);
+                .rawQuery("select * from sqlite_master where type='table' ORDER BY name", null); // [MODIFIED] BV6LC
         return HtmlContext.ListTableContext(cursor, true, 4, true);
     }
 
@@ -400,29 +414,56 @@ public class LogHttpServer extends NanoHTTPD {
 
 
     /**
-     * 获取关注的呼号
+     * 获取关注的呼号 及手動輸入關注呼號 (// [MODIFIED]) BVy6LC
      *
      * @return HTML
      */
     private String getFollowCallsigns() {
-        Cursor cursor = mainViewModel.databaseOpr.getDb().rawQuery("select * from followCallsigns", null);
-        StringBuilder result = new StringBuilder();
-        HtmlContext.tableBegin(result, true, 3, false).append("\n");
+        Cursor cursor = mainViewModel.databaseOpr.getDb().rawQuery("select * from followCallsigns order by callsign", null); // // [MODIFIED] BV6LC 依照呼號排序
+        //Cursor cursor = mainViewModel.databaseOpr.getDb().rawQuery("select a.* from followCallsigns as a order by callsign", null); // // [MODIFIED] BV6LC 依照呼號排序
+        
+		StringBuilder result = new StringBuilder();
+		
+		// [MODIFIED] 新增一個段落，包含文字方塊和按鈕，按鈕會呼叫 /addfollow /BV6LC
+
+		result.append("<p>\n<form action=/addfollow/");
+		result.append(String.format("  <label for=\"callsign\">%s:</label>\n",
+									GeneralVariables.getStringFromResource(R.string.html_callsign)
+									)
+					 );
+		result.append("  <input type=\"text\" id=\"callsign\" name=\"callsign\" placeholder=\"輸入呼號\">\n");
+		result.append("  <input type=\"submit\" value=\"新增關注呼號\">\n");
+		result.append("</p></form>\n");
+			
+		
+        HtmlContext.tableBegin(result, true, 4, false).append("\n"); //BV6LC
 
         //写字段名
         HtmlContext.tableRowBegin(result).append("\n");
         for (int i = 0; i < cursor.getColumnCount(); i++) {
             HtmlContext.tableCellHeader(result
                     , GeneralVariables.getStringFromResource(R.string.html_callsign)
-                    , GeneralVariables.getStringFromResource(R.string.html_operation)).append("\n");
+                    , GeneralVariables.getStringFromResource(R.string.html_country)               //BV6LC 
+					, GeneralVariables.getStringFromResource(R.string.html_operation)).append("\n"); //BV6LC
         }
         HtmlContext.tableRowEnd(result).append("\n");
         int order = 0;
         while (cursor.moveToNext()) {
             HtmlContext.tableRowBegin(result, true, order % 2 != 0).append("\n");
+			
+			
+			//CallsignInfo fromCallsignInfo = getCallsignInfo(GeneralVariables.callsignDatabase.getDb(),"BV6LC"); // BV6LC
+			//String country="TEST"; //BV6LC
+			//country=GeneralVariables.getGridByCallsign("BV6LC", GeneralVariables.callsignDatabase.getDb());
+			//country=GeneralVariables.getCountryByCallsign("BV6LC",mainViewModel.databaseOpr);
+			
+
+			
             for (int i = 0; i < cursor.getColumnCount(); i++) {
-                HtmlContext.tableCell(result
-                        , cursor.getString(i)
+                
+				HtmlContext.tableCell(result
+                        , String.format("<div style='text-align:left;'>%s</div>",cursor.getString(i)) //[MODIFIED] BV6LC
+						, String.format("%s",GeneralVariables.getCountryByCallsign(cursor.getString(i),mainViewModel.databaseOpr))
                         , String.format("<a href=/delfollow/%s>%s</a>"
                                 , cursor.getString(i).replace("/", "_")
                                 , GeneralVariables.getStringFromResource(R.string.html_delete))
@@ -444,6 +485,43 @@ public class LogHttpServer extends NanoHTTPD {
     private void deleteFollowCallSign(String callsign) {
         mainViewModel.databaseOpr.getDb().execSQL("delete from followCallsigns where callsign=?", new String[]{callsign});
     }
+	
+	/*  [MODIFIED] BV6LC
+     * 手動新增關注的呼号
+     *
+     * @param callsign 关注的呼号
+    */
+    private String addFollowCallSign(IHTTPSession session) 
+	{
+		try {
+			String callsign = "";
+			Map<String, String> queryParams = session.getParms();  // 定義 queryParams
+			//檢查表單中是否包含 "callsign" 的欄位
+            if (queryParams.containsKey("callsign"))
+				{
+					callsign = queryParams.get("callsign").toUpperCase(); ;// 取得input中name="callsign"的值
+					if (!callsign.isEmpty()) 
+						{
+						 Log.i(TAG, "收到呼號: " + callsign);
+						 mainViewModel.databaseOpr.getDb().execSQL("insert into followCallsigns (callsign) values (?)", new String[]{callsign});
+						}
+					
+				}
+			//	{
+			//	  // 取得input中name="callsign"的值
+            //     Log.i(TAG, "收到呼號: " + callsign);
+			//	}
+			mainViewModel.getFollowCallsignsFromDataBase();
+			
+			return "插入成功";
+			} 
+			catch (Exception e) 
+			{
+			return "Insert fail，錯誤訊息：" + e.getMessage();	
+			}
+				
+    }
+	
 
     private void deleteQSLByMonth(String month) {
         mainViewModel.databaseOpr.getDb().execSQL("delete from QSLTable where SUBSTR(qso_date,1,6)=? \n"

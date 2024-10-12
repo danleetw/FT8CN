@@ -18,11 +18,11 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.bg7yoz.ft8cn"
+        applicationId "com.bg7yoz.ft8tw"
         minSdk 23
         targetSdk 33
         versionCode 1
-        versionName '0.92'
+        versionName '0.921'
 
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         dataBinding{
@@ -80,6 +80,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.5.3'
     implementation 'androidx.navigation:navigation-ui:2.5.3'
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
+	implementation 'androidx.core:core:1.6.0'
 
     implementation 'com.google.guava:guava:31.1-jre'//用于HashTable（多key的HashMap）
 

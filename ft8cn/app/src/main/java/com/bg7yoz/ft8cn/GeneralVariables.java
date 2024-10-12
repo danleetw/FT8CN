@@ -11,6 +11,7 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 
 import com.bg7yoz.ft8cn.callsign.CallsignDatabase;
+import com.bg7yoz.ft8cn.callsign.CallsignInfo; //BV6LC
 import com.bg7yoz.ft8cn.connector.ConnectMode;
 import com.bg7yoz.ft8cn.database.ControlMode;
 import com.bg7yoz.ft8cn.database.DatabaseOpr;
@@ -578,6 +579,21 @@ public class GeneralVariables {
             return "";
         }
     }
+	
+	// BV6LC
+	public static String getCountryByCallsign(String callsign, DatabaseOpr db) {
+		
+		
+        String s = callsign.replace("<", "").replace(">", "");
+		// 創建 CallsignDatabase 的實例
+		//CallsignDatabase database = new CallsignDatabase();
+		//CallsignInfo callsignInfo=getCallsignInfo(db,callsign);
+		CallsignInfo callsignInfo =GeneralVariables.callsignDatabase.getCallInfo(callsign);
+		
+		return callsignInfo.CountryNameCN;
+
+    }
+	
 
     /**
      * 遍历呼号--网格对应表，生成HTML

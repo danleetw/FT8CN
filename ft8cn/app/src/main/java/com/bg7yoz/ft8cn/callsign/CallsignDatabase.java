@@ -123,7 +123,7 @@ public class CallsignDatabase extends SQLiteOpenHelper {
                     msg.fromItu = !GeneralVariables.getItuZoneById(fromCallsignInfo.ITUZone);
                     msg.fromCq = !GeneralVariables.getCqZoneById(fromCallsignInfo.CQZone);
                     if (GeneralVariables.isChina) {
-                        msg.fromWhere = fromCallsignInfo.CountryNameCN;
+                        msg.fromWhere = fromCallsignInfo.CountryNameCN;  //BV6LC
                     } else {
                         msg.fromWhere = fromCallsignInfo.CountryNameEn;
                     }
@@ -150,7 +150,7 @@ public class CallsignDatabase extends SQLiteOpenHelper {
             }
         }
     }
-
+	// 取得呼號國家 BV6LC
     @SuppressLint("Range")
     private static CallsignInfo getCallsignInfo(SQLiteDatabase db, String callsign) {
         CallsignInfo callsignInfo = null;

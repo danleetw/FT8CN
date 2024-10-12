@@ -604,14 +604,15 @@ public class GridTrackerMainActivity extends AppCompatActivity {
                     }
                 });
 
-        floatView.addButton(R.id.set_volume, "set_volume", R.drawable.ic_baseline_volume_up_24
+        /*floatView.addButton(R.id.set_volume, "set_volume", R.drawable.ic_baseline_volume_up_24
                 , new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         new SetVolumeDialog(binding.trackConstraint.getContext(), mainViewModel).show();
                     }
                 });
-        floatView.addButton(R.id.grid_tracker_config, "grid_tracker_config"
+        */ // [MODIFIED]
+		floatView.addButton(R.id.grid_tracker_config, "grid_tracker_config"
                 , R.drawable.ic_baseline_tracker_settings_24
                 , new View.OnClickListener() {
                     @Override

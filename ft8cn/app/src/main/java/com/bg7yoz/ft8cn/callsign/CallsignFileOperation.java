@@ -76,7 +76,8 @@ public class CallsignFileOperation {
         AssetManager assetManager = context.getAssets();
         try {
             InputStream inputStream;
-            if (GeneralVariables.isTraditionalChinese) {
+            //if (GeneralVariables.isTraditionalChinese) { // [MODIFIED]
+			if (GeneralVariables.isChina) {	
                 inputStream = assetManager.open("country_en2hk.dat");//繁体中文
             }else {
                 inputStream = assetManager.open("country_en2cn.dat");//简体中文

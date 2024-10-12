@@ -5,6 +5,11 @@ package com.bg7yoz.ft8cn.ui;
  * @date 2023-03-20
  */
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
@@ -37,6 +42,16 @@ import com.bg7yoz.ft8cn.rigs.InstructionSet;
 import com.bg7yoz.ft8cn.timer.UtcTimer;
 
 import java.io.IOException;
+
+import android.content.Context; // [MODIFIED]
+import android.location.Location; // [MODIFIED]
+import android.location.LocationManager; // [MODIFIED]
+import android.location.LocationListener; // [MODIFIED]
+
+
+import java.text.SimpleDateFormat;// [MODIFIED]
+import java.util.TimeZone; // [ADD THIS LINE]
+import java.util.Date; // [ADD THIS LINE]
 
 /**
  * A simple {@link Fragment} subclass.
@@ -1365,35 +1380,148 @@ public class ConfigFragment extends Fragment {
             }
         });
 
-        binding.synTImeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                UtcTimer.syncTime(new UtcTimer.AfterSyncTime() {
-                    @Override
-                    public void doAfterSyncTimer(int secTime) {
-                        setUtcTimeOffsetSpinner();
-                        if (secTime>100) {//正数时慢了
-                            ToastMessage.show(String.format(GeneralVariables
-                                    .getStringFromResource(R.string.utc_time_sync_delay_slow), secTime));
-                        }else if (secTime<-100){
-                            ToastMessage.show(String.format(GeneralVariables
-                                    .getStringFromResource(R.string.utc_time_sync_delay_faster), -secTime));
-                        }else {
-                            ToastMessage.show(GeneralVariables
-                                    .getStringFromResource(R.string.config_clock_is_accurate));
-                        }
-                    }
+        // 改成用GPS優先
+		binding.synTImeButton.setOnClickListener(
+			new View.OnClickListener() 
+			{
+				@Override public void onClick(View view) {
+					//ToastMessage.show("Check Time"); // [MODIFIED]
+					// 檢查並優先使用 GPS 進行時間同步
+					LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE); // [MODIFIED]
+					
+					// 檢查是否有位置權限
+					if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+						// 如果沒有權限，請求權限
+						//ToastMessage.show("No GPS Permmion");
+						ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1); // [MODIFIED]
+						return;
+					}else {
+							//ToastMessage.show("GPS Permmion OK");
+						}
+					
 
-                    @Override
-                    public void syncFailed(IOException e) {
-                        ToastMessage.show(e.getMessage());
-                    }
-                });
+					// 判斷 GPS 是否可用
+					if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) 
+					{ // [MODIFIED]
+						//ToastMessage.show("GPS 可用ProviderEnabled");
+						// 嘗試從 GPS 取得位置和時間
+						//ToastMessage.show("Try to get GPS Info!");
+						// 告訴使用者正在使用 GPS 進行同步
+						ToastMessage.show(GeneralVariables.getStringFromResource(R.string.using_gps_time_sync)); // [MODIFIED]
+						locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, new LocationListener()  { // [MODIFIED]
+							@Override
+							public void onLocationChanged(Location location) { // [MODIFIED]
+								// 取得 GPS 時間
+								//ToastMessage.show("Try to get GPS Info!");
+								long gpsTime = location.getTime(); // [MODIFIED]
+								
+								
+								// 用當前系統時間和 GPS 時間計算差異 (秒)
+								//int trueDelay = (int) ((gpsTime - System.currentTimeMillis()));
+								int trueDelay =(int) ((gpsTime - System.currentTimeMillis()));
+								int secTime=0;
+								secTime=trueDelay;
+								trueDelay = trueDelay % 15000;//延迟的周期
+								
 
-            }
-        });
+								//int secTime = (int) ((gpsTime - System.currentTimeMillis()) / 1000); // [MODIFIED]
+								//UtcTimer.ChgsyncTime(trueDelay);
+								
+								UtcTimer.ChgsyncTime(trueDelay);
+								setUtcTimeOffsetSpinner(); // [MODIFIED]
+								
 
-    }
+								
+								
+								
+								// 创建 SimpleDateFormat 实例，用于格式化时间
+								SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+								// 设置时区为 UTC
+								sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+								// 将 gpsTime 转换为 Date 对象
+								Date date = new Date(gpsTime);
+								// 格式化时间为 UTC HH:MM:SS 字符串
+								String utcTimeString = sdf.format(date);
+								// 打印或显示结果
+								ToastMessage.show("UTC Time: " + utcTimeString);
+
+
+								//ToastMessage.show(String.format("時間差: %d 毫秒(%d秒)", trueDelay,trueDelay/1000));
+								
+								//ToastMessage.show(String.format("Sel : %d ", (UtcTimer.delay / 100 + 75) / 5) );
+								//binding.utcTimeOffsetSpinner.setSelection((UtcTimer.delay / 100 + 75) / 5);
+								//binding.utcTimeOffsetSpinner.setSelection(5);
+								// 根據時間差異進行提示
+								if (secTime > 100) { // 時間偏慢 [MODIFIED]
+									//ToastMessage.show("時間偏慢");
+									ToastMessage.show(String.format(GeneralVariables
+											.getStringFromResource(R.string.utc_time_sync_delay_slow), secTime)); // [MODIFIED]
+								} else if (secTime < -100) { // 時間偏快 [MODIFIED]
+									//ToastMessage.show("時間偏快");
+									ToastMessage.show(String.format(GeneralVariables
+											.getStringFromResource(R.string.utc_time_sync_delay_faster), -secTime)); // [MODIFIED]
+								} else { // 時間準確 [MODIFIED]
+									//ToastMessage.show("時間準確");
+									ToastMessage.show(GeneralVariables
+											.getStringFromResource(R.string.config_clock_is_accurate)); // [MODIFIED]
+								}
+							}
+
+							@Override
+							public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+							@Override
+							public void onProviderEnabled(String provider) {}
+
+							@Override
+							public void onProviderDisabled(String provider) {
+								// 如果 GPS 無法使用或失敗，則使用 UTC 同步時間
+								//syncTimeWithUtcTimer(); // [MODIFIED]
+								//ToastMessage.show("位置未更新");
+								//ToastMessage.show(GeneralVariables
+								//			.getStringFromResource(R.string.config_clock_is_accurate)); // [MODIFIED]
+							}
+						}, null);
+					}else
+						{
+							//ToastMessage.show("Try to get Time Server info");
+							// 告訴使用者正在使用 Time Server 進行同步
+							ToastMessage.show(GeneralVariables.getStringFromResource(R.string.using_network_time_sync)); // [MODIFIED]
+							UtcTimer.syncTime(new UtcTimer.AfterSyncTime() {
+								@Override
+								public void doAfterSyncTimer(int secTime) {
+									setUtcTimeOffsetSpinner();
+									if (secTime>100) {//正数时慢了
+										ToastMessage.show(String.format(GeneralVariables
+												.getStringFromResource(R.string.utc_time_sync_delay_slow), secTime));
+									}else if (secTime<-100){
+										ToastMessage.show(String.format(GeneralVariables
+												.getStringFromResource(R.string.utc_time_sync_delay_faster), -secTime));
+									}else {
+										ToastMessage.show(GeneralVariables
+												.getStringFromResource(R.string.config_clock_is_accurate));
+									}
+								}
+
+								@Override
+								public void syncFailed(IOException e) {
+									ToastMessage.show(e.getMessage());
+								}
+							});
+							
+							
+							
+							
+							
+							
+							
+							//--------------------
+						}						
+				} //-----
+			});
+
+
+		}
 
     /**
      * 设置界面的上下滚动的图标

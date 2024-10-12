@@ -46,7 +46,7 @@ public class FlexRadioInfoFragment extends Fragment {
         if (mainViewModel.baseRig != null) {
             connector = (FlexConnector) mainViewModel.baseRig.getConnector();
             connector.subAllMeters();
-            connector.mutableMeterList.observe(this, new Observer<FlexMeterList>() {
+            connector.mutableMeterList.observe(getViewLifecycleOwner(), new Observer<FlexMeterList>() {
                 @Override
                 public void onChanged(FlexMeterList meters) {
                     //binding.flexInfoTextView.setText(String.format("%f",meters.alcVal));

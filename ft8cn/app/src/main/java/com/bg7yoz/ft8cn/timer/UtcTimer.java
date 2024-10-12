@@ -27,8 +27,21 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import android.content.Context; // [MODIFIED]
+import android.location.Location; // [MODIFIED]
+import android.location.LocationManager; // [MODIFIED]
+import android.location.LocationListener; // [MODIFIED]
+import androidx.core.app.ActivityCompat; // [MODIFIED]
+
+import android.app.Application;
+
+
+
 
 public class UtcTimer {
+    private static final long MIN_TIME_BW_UPDATES = 1000; // 1 second [MODIFIED]
+    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1.0f; // 1 meter [MODIFIED]
+	
     private final int sec;
     private final boolean doOnce;
     private final OnUtcTimer onUtcTimer;
@@ -269,6 +282,7 @@ public class UtcTimer {
         new Thread(new Runnable() {
             @Override
             public void run() {
+				
                 NTPUDPClient timeClient = new NTPUDPClient();
                 InetAddress inetAddress = null;
                 TimeInfo timeInfo = null;
@@ -292,6 +306,13 @@ public class UtcTimer {
             }
         }).start();
     }
+
+
+
+	public static void ChgsyncTime(int trueDelay)  // Modify BV6LC
+		{
+			UtcTimer.delay = trueDelay ;//延迟的周期
+		}
 
     public interface AfterSyncTime {
         void doAfterSyncTimer(int secTime);

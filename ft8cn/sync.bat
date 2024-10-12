@@ -1,0 +1,1 @@
+start app\build\outputs\apk\debug

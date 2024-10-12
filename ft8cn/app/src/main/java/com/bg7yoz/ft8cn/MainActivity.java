@@ -114,12 +114,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         GeneralVariables.getInstance().setMainContext(getApplicationContext());
 
-        //判断是不是简体中文
+        //判断是不是简体中文// 
         GeneralVariables.isTraditionalChinese =
                 getResources().getConfiguration().locale.getDisplayCountry().equals("中國");
 
-        //确定是不是中国、香港、澳门、台湾
-        GeneralVariables.isChina = (getResources().getConfiguration().locale
+        //确定是不是中国、香港、澳门、台湾 // [MODIFIED]
+        GeneralVariables.isChina= (getResources().getConfiguration().locale
                 .getLanguage().toUpperCase().startsWith("ZH"));
 
         mainViewModel = MainViewModel.getInstance(this);
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         ToastMessage.getInstance();
         registerBluetoothReceiver();//注册蓝牙动作改变的广播
         if (mainViewModel.isBTConnected()) {
-            mainViewModel.setBlueToothOn();
+            //mainViewModel.setBlueToothOn(); // [MODIFIED]
         }
 
 
@@ -349,13 +349,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        floatView.addButton(R.id.set_volume, "set_volume", R.drawable.ic_baseline_volume_up_24
+        /*floatView.addButton(R.id.set_volume, "set_volume", R.drawable.ic_baseline_volume_up_24
                 , new View.OnClickListener() {
+					
                     @Override
                     public void onClick(View view) {
                         new SetVolumeDialog(binding.container.getContext(), mainViewModel).show();
                     }
                 });
+		*/ // [MODIFIED]		
         //打开网格追踪
         floatView.addButton(R.id.grid_tracker, "grid_tracker", R.drawable.ic_baseline_grid_tracker_24
                 , new View.OnClickListener() {

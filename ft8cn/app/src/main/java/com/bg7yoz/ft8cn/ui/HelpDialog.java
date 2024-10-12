@@ -14,6 +14,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.text.Html; //BV6LC
+import android.text.method.LinkMovementMethod; //BV6LC
+
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -83,7 +86,11 @@ public class HelpDialog extends Dialog {
         messageTextView = (TextView) findViewById(R.id.helpMessage);
         appNameTextView = (TextView) findViewById(R.id.appNameTextView);
         buildVersionTextView = (TextView) findViewById(R.id.buildVersionTextView);
-        messageTextView.setText(msg);
+        
+		//messageTextView.setText(msg); //BV6LC
+		messageTextView.setText(Html.fromHtml(msg)); //BV6LC
+		messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
+		 
         upImageView = (ImageView) findViewById(R.id.scrollUpImageView);
         downImageView = (ImageView) findViewById(R.id.scrollDownImageView);
         scrollView = (ScrollView) findViewById(R.id.helpScrollView);
@@ -106,7 +113,7 @@ public class HelpDialog extends Dialog {
         getNewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                jumpUriToBrowser(context,"https://github.com/N0BOY/FT8CN/releases");
+                jumpUriToBrowser(context,"https://github.com/danleetw/FT8TW/releases");
             }
         });
 
